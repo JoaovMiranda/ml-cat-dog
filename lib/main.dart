@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite/tflite.dart';
 
-void main() { runApp(MaterialApp(
+void main() => runApp(MaterialApp(
   debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
       home: HomePage(),
 ));
-}
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -20,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   List _outputs;
   File _image;
   bool _loading = false;
+  final picker = ImagePicker();
 
   @override
   void initState() {
@@ -86,17 +87,18 @@ class _HomePageState extends State<HomePage> {
 
   /// Pega a imagem dependendo da localidade
   Future<void> chooseImage(ImageSource source) async {
-    var image = await ImagePicker.pickImage(source: source);
+    final image = await picker.getImage(source: source);
     if (image == null) return null;
     setState(() {
       _loading = true;
-      _image = image;
+      _image = File(image.path);
     });
-    classifyImage(image);
+    classifyImage(File(image.path));
   }
 
 /// Classifica a imagem
   classifyImage(File image) async{
+    if (image == null) return;
     var output = await Tflite.runModelOnImage(
         path: image.path,
         numResults: 2,
